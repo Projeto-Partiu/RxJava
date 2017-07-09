@@ -420,9 +420,12 @@ public final class BehaviorProcessor<T> extends FlowableProcessor<T> {
     void setCurrent(Object o) {
         Lock wl = writeLock;
         wl.lock();
-        index++;
-        value.lazySet(o);
-        wl.unlock();
+        try {
+            index++;
+            value.lazySet(o);
+        } finally {
+            wl.unlock();
+        }
     }
 
     static final class BehaviorSubscription<T> extends AtomicLong implements Subscription, NonThrowingPredicate<Object> {

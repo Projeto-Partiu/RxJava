@@ -127,34 +127,38 @@ public final class FlowableRefCount<T> extends AbstractFlowableWithUpstream<T, T
     public void subscribeActual(final Subscriber<? super T> subscriber) {
 
         lock.lock();
-        if (subscriptionCount.incrementAndGet() == 1) {
+        try {
+            if (subscriptionCount.incrementAndGet() == 1) {
 
-            final AtomicBoolean writeLocked = new AtomicBoolean(true);
+                final AtomicBoolean writeLocked = new AtomicBoolean(true);
 
-            try {
-                // need to use this overload of connect to ensure that
-                // baseSubscription is set in the case that source is a
-                // synchronous Observable
-                source.connect(onSubscribe(subscriber, writeLocked));
-            } finally {
-                // need to cover the case where the source is subscribed to
-                // outside of this class thus preventing the Consumer passed
-                // to source.connect above being called
-                if (writeLocked.get()) {
-                    // Consumer passed to source.connect was not called
+                try {
+                    // need to use this overload of connect to ensure that
+                    // baseSubscription is set in the case that source is a
+                    // synchronous Observable
+                    source.connect(onSubscribe(subscriber, writeLocked));
+                } finally {
+                    // need to cover the case where the source is subscribed to
+                    // outside of this class thus preventing the Consumer passed
+                    // to source.connect above being called
+                    if (writeLocked.get()) {
+                        // Consumer passed to source.connect was not called
+                        lock.unlock();
+                    }
+                }
+            } else {
+                try {
+                    // ready to subscribe to source so do it
+                    doSubscribe(subscriber, baseDisposable);
+                } finally {
+                    // release the read lock
                     lock.unlock();
                 }
             }
-        } else {
-            try {
-                // ready to subscribe to source so do it
-                doSubscribe(subscriber, baseDisposable);
-            } finally {
-                // release the read lock
-                lock.unlock();
-            }
         }
-
+        finally {
+            lock.unlock();
+        }
     }
 
     private Consumer<Disposable> onSubscribe(final Subscriber<? super T> subscriber,
