@@ -13,6 +13,7 @@
 package io.reactivex.internal.util;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A list implementation which combines an ArrayList with a LinkedList to
@@ -35,7 +36,7 @@ public class LinkedArrayList {
      * The total size of the list; written after elements have been added (release) and
      * and when read, the value indicates how many elements can be safely read (acquire).
      */
-    volatile int size;
+    AtomicInteger size;
     /** The next available slot in the current tail. */
     int indexInTail;
     /**
@@ -51,12 +52,12 @@ public class LinkedArrayList {
      */
     public void add(Object o) {
         // if no value yet, create the first array
-        if (size == 0) {
+        if (size.get() == 0) {
             head = new Object[capacityHint + 1];
             tail = head;
             head[0] = o;
             indexInTail = 1;
-            size = 1;
+            size.incrementAndGet();
         } else
         // if the tail is full, create a new tail and link
         if (indexInTail == capacityHint) {
@@ -65,11 +66,11 @@ public class LinkedArrayList {
             tail[capacityHint] = t;
             tail = t;
             indexInTail = 1;
-            size++;
+            size.incrementAndGet();
         } else {
             tail[indexInTail] = o;
             indexInTail++;
-            size++;
+            size.incrementAndGet();
         }
     }
     /**
@@ -85,12 +86,12 @@ public class LinkedArrayList {
      * @return the total size of the list
      */
     public int size() {
-        return size;
+        return size.get();
     }
     @Override
     public String toString() {
         final int cap = capacityHint;
-        final int s = size;
+        final int s = size.get();
         final List<Object> list = new ArrayList<Object>(s + 1);
 
         Object[] h = head();

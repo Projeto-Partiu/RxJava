@@ -64,6 +64,7 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
      * Child Subscribers will observe the events of the ConnectableObservable on the
      * specified scheduler.
      * @param <T> the value type
+     * @param <T> the value type
      * @param co the ConnectableFlowable to wrap
      * @param scheduler the target scheduler
      * @return the new ConnectableObservable instance
@@ -639,7 +640,7 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
 
         private static final long serialVersionUID = 7063189396499112664L;
         /** The total number of events in the buffer. */
-        volatile int size;
+        AtomicInteger size;
 
         UnboundedReplayBuffer(int capacityHint) {
             super(capacityHint);
@@ -647,19 +648,20 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
         @Override
         public void next(T value) {
             add(NotificationLite.next(value));
-            size++;
+            size.incrementAndGet();
+            
         }
 
         @Override
         public void error(Throwable e) {
             add(NotificationLite.error(e));
-            size++;
+            size.incrementAndGet();
         }
 
         @Override
         public void complete() {
             add(NotificationLite.complete());
-            size++;
+            size.incrementAndGet();
         }
 
         @Override
@@ -677,7 +679,7 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
                 if (output.isDisposed()) {
                     return;
                 }
-                int sourceIndex = size;
+                int sourceIndex = size.get();
 
                 Integer destinationIndexObject = output.index();
                 int destinationIndex = destinationIndexObject != null ? destinationIndexObject : 0;

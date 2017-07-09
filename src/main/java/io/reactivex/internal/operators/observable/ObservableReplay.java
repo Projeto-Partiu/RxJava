@@ -506,7 +506,7 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
 
         private static final long serialVersionUID = 7063189396499112664L;
         /** The total number of events in the buffer. */
-        volatile int size;
+        AtomicInteger size;
 
         UnboundedReplayBuffer(int capacityHint) {
             super(capacityHint);
@@ -514,19 +514,19 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
         @Override
         public void next(T value) {
             add(NotificationLite.next(value));
-            size++;
+            size.incrementAndGet();
         }
 
         @Override
         public void error(Throwable e) {
             add(NotificationLite.error(e));
-            size++;
+            size.incrementAndGet();
         }
 
         @Override
         public void complete() {
             add(NotificationLite.complete());
-            size++;
+            size.incrementAndGet();
         }
 
         @Override
@@ -543,7 +543,7 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
                 if (output.isDisposed()) {
                     return;
                 }
-                int sourceIndex = size;
+                int sourceIndex = size.get();
 
                 Integer destinationIndexObject = output.index();
                 int destinationIndex = destinationIndexObject != null ? destinationIndexObject : 0;

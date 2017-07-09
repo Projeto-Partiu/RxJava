@@ -524,7 +524,7 @@ public final class ReplaySubject<T> extends Subject<T> {
 
         volatile boolean done;
 
-        volatile int size;
+        AtomicInteger size;
 
         UnboundedReplayBuffer(int capacityHint) {
             this.buffer = new ArrayList<Object>(ObjectHelper.verifyPositive(capacityHint, "capacityHint"));
@@ -533,20 +533,20 @@ public final class ReplaySubject<T> extends Subject<T> {
         @Override
         public void add(T value) {
             buffer.add(value);
-            size++;
+            size.incrementAndGet();
         }
 
         @Override
         public void addFinal(Object notificationLite) {
             buffer.add(notificationLite);
-            size++;
+            size.incrementAndGet();
             done = true;
         }
 
         @Override
         @SuppressWarnings("unchecked")
         public T getValue() {
-            int s = size;
+            int s = size.get();
             if (s != 0) {
                 List<Object> b = buffer;
                 Object o = b.get(s - 1);
@@ -564,7 +564,7 @@ public final class ReplaySubject<T> extends Subject<T> {
         @Override
         @SuppressWarnings("unchecked")
         public T[] getValues(T[] array) {
-            int s = size;
+            int s = size.get();
             if (s == 0) {
                 if (array.length != 0) {
                     array[0] = null;
@@ -625,7 +625,7 @@ public final class ReplaySubject<T> extends Subject<T> {
                     return;
                 }
 
-                int s = size;
+                int s = size.get();
 
                 while (s != index) {
 
@@ -638,7 +638,7 @@ public final class ReplaySubject<T> extends Subject<T> {
 
                     if (done) {
                         if (index + 1 == s) {
-                            s = size;
+                            s = size.get();
                             if (index + 1 == s) {
                                 if (NotificationLite.isComplete(o)) {
                                     a.onComplete();
@@ -656,7 +656,7 @@ public final class ReplaySubject<T> extends Subject<T> {
                     index++;
                 }
 
-                if (index != size) {
+                if (index != size.get()) {
                     continue;
                 }
 
@@ -671,7 +671,7 @@ public final class ReplaySubject<T> extends Subject<T> {
 
         @Override
         public int size() {
-            int s = size;
+            int s = size.get();
             if (s != 0) {
                 Object o = buffer.get(s - 1);
                 if (NotificationLite.isComplete(o) || NotificationLite.isError(o)) {
