@@ -21,6 +21,7 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.*;
 import io.reactivex.internal.disposables.EmptyDisposable;
 import io.reactivex.internal.functions.ObjectHelper;
+import io.reactivex.internal.schedulers.TrampolineScheduler;
 
 /**
  * A special, non thread-safe scheduler for testing operators that require
@@ -60,6 +61,29 @@ public final class TestScheduler extends Scheduler {
                 return ObjectHelper.compare(count, o.count);
             }
             return ObjectHelper.compare(time, o.time);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+
+            if (this == obj)
+                return true;
+
+            if (obj == null)
+                return false;
+
+            if (getClass() != obj.getClass())
+                return false;
+
+            TimedRunnable other = (TimedRunnable) obj;
+
+            if (time != other.time)
+                return false;
+
+            if (count != other.count)
+                return false;
+
+            return true;
         }
     }
 
