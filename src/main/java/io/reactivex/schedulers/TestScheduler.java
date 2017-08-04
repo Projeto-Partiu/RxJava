@@ -57,33 +57,11 @@ public final class TestScheduler extends Scheduler {
 
         @Override
         public int compareTo(TimedRunnable o) {
-            if (time == o.time) {
-                return ObjectHelper.compare(count, o.count);
-            }
-            return ObjectHelper.compare(time, o.time);
-        }
 
-        @Override
-        public boolean equals(Object obj) {
+            int result = Long.valueOf(time).compareTo(Long.valueOf(o.time));
 
-            if (this == obj)
-                return true;
-
-            if (obj == null)
-                return false;
-
-            if (getClass() != obj.getClass())
-                return false;
-
-            TimedRunnable other = (TimedRunnable) obj;
-
-            if (time != other.time)
-                return false;
-
-            if (count != other.count)
-                return false;
-
-            return true;
+            return result != 0 ? result :
+                    Long.valueOf(count).compareTo(Long.valueOf(o.count));
         }
     }
 
