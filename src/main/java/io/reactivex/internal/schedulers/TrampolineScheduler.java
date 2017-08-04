@@ -165,12 +165,13 @@ public final class TrampolineScheduler extends Scheduler {
 
         @Override
         public int compareTo(TimedRunnable that) {
-            int result = ObjectHelper.compare(execTime, that.execTime);
-            if (result == 0) {
-                return ObjectHelper.compare(count, that.count);
-            }
-            return result;
+
+            int result = Long.valueOf(execTime).compareTo(that.execTime);
+
+            return result != 0 ? result :
+                    Long.valueOf(count).compareTo(Long.valueOf(that.count));
         }
+
     }
 
     static final class SleepingRunnable implements Runnable {
