@@ -687,7 +687,7 @@ public class ObservableConcatMapEagerTest {
     }
 
     @Test
-    public void Observable() {
+    public void observable() {
         Observable<Integer> source = Observable.just(1);
         TestObserver<Integer> ts = TestObserver.create();
 
@@ -699,7 +699,7 @@ public class ObservableConcatMapEagerTest {
     }
 
     @Test
-    public void ObservableCapacityHint() {
+    public void observableCapacityHint() {
         Observable<Integer> source = Observable.just(1);
         TestObserver<Integer> ts = TestObserver.create();
 

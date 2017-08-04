@@ -56,10 +56,12 @@ public final class TestScheduler extends Scheduler {
 
         @Override
         public int compareTo(TimedRunnable o) {
-            if (time == o.time) {
-                return ObjectHelper.compare(count, o.count);
-            }
-            return ObjectHelper.compare(time, o.time);
+
+            int result = Long.valueOf(time).compareTo(Long.valueOf(o.time));
+
+            if(result != 0) return result;
+
+            return Long.valueOf(count).compareTo(Long.valueOf(o.count));
         }
     }
 
